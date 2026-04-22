@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block title %}Students – EduManage{% endblock %}
+{% block page_title %}Students{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <span><i class="bi bi-people me-2 text-primary"></i>All Students</span>
+    <a href="{% url 'student_create' %}" class="btn btn-primary btn-sm">
+      <i class="bi bi-plus-lg me-1"></i>Add Student
+    </a>
+  </div>
+  <div class="card-body border-bottom">
+    <form method="get" class="row g-2">
+      <div class="col-md-5">
+        <div class="search-wrap">
+          <i class="bi bi-search"></i>
+          <input type="text" name="q" class="form-control" placeholder="Search by name, ID, email…" value="{{ query }}">
+        </div>
+      </div>
+      <div class="col-md-3">
+        <select name="status" class="form-select">
+          <option value="">All Status</option>
+          <option value="active" {% if status == 'active' %}selected{% endif %}>Active</option>
+          <option value="inactive" {% if status == 'inactive' %}selected{% endif %}>Inactive</option>
+          <option value="graduated" {% if status == 'graduated' %}selected{% endif %}>Graduated</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select name="class_name" class="form-select">
+          <option value="">All Classes</option>
+          {% for c in classes %}<option value="{{ c }}" {% if class_filter == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-primary flex-fill">Filter</button>
+        <a href="{% url 'student_list' %}" class="btn btn-outline-secondary">✕</a>
+      </div>
+    </form>
+  </div>
+  <div class="card-body p-0">
+    {% if students %}
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Student ID</th>
+            <th>Class / Section</th>
+            <th>Phone</th>
+            <th>Enrolled</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in students %}
+          <tr>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#06b6d4);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0;">
+                  {{ s.first_name.0 }}{{ s.last_name.0 }}
+                </div>
+                <div>
+                  <div style="font-weight:600;font-size:13px;">{{ s.full_name }}</div>
+                  <div style="font-size:11px;color:#64748b;">{{ s.email }}</div>
+                </div>
+              </div>
+            </td>
+            <td><code style="font-size:12px;">{{ s.student_id }}</code></td>
+            <td>{{ s.class_name }} {% if s.section %}– {{ s.section }}{% endif %}</td>
+            <td>{{ s.phone|default:"—" }}</td>
+            <td style="font-size:12px;">{{ s.enrollment_date }}</td>
+            <td><span class="badge badge-{{ s.status }}">{{ s.get_status_display }}</span></td>
+            <td>
+              <div class="d-flex gap-1">
+                <a href="{% url 'student_detail' s.pk %}" class="btn btn-sm btn-outline-primary" title="View"><i class="bi bi-eye"></i></a>
+                <a href="{% url 'student_edit' s.pk %}" class="btn btn-sm btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
+                <a href="{% url 'student_delete' s.pk %}" class="btn btn-sm btn-outline-danger" title="Delete"><i class="bi bi-trash"></i></a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="px-4 py-3 text-muted" style="font-size:13px;">
+      Showing {{ students|length }} student{{ students|length|pluralize }}
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-people fs-1 d-block mb-2"></i>
+      No students found.
+      <br><a href="{% url 'student_create' %}" class="btn btn-primary btn-sm mt-2">Add Student</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

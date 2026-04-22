@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}Attendance – EduManage{% endblock %}
+{% block page_title %}Attendance{% endblock %}
+
+{% block content %}
+<!-- Filter -->
+<div class="card mb-4">
+  <div class="card-body">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label">Date</label>
+        <input type="date" name="date" class="form-control" value="{{ date_filter }}">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Class</label>
+        <select name="class_name" class="form-select">
+          <option value="">All Classes</option>
+          {% for c in classes %}<option value="{{ c }}" {% if class_filter == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4 d-flex gap-2">
+        <button type="submit" class="btn btn-primary flex-fill">Filter</button>
+        <a href="{% url 'attendance_list' %}" class="btn btn-outline-secondary">Reset</a>
+        <a href="{% url 'bulk_attendance' %}" class="btn btn-outline-primary">Bulk Mark</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="stat-card stat-blue" style="padding:18px;">
+      <div class="stat-value" style="font-size:26px;">{{ total }}</div>
+      <div class="stat-label">Total</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card stat-green" style="padding:18px;">
+      <div class="stat-value" style="font-size:26px;">{{ present }}</div>
+      <div class="stat-label">Present</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card stat-rose" style="padding:18px;">
+      <div class="stat-value" style="font-size:26px;">{{ absent }}</div>
+      <div class="stat-label">Absent</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card stat-amber" style="padding:18px;">
+      <div class="stat-value" style="font-size:26px;">{{ late }}</div>
+      <div class="stat-label">Late</div>
+    </div>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="card">
+  <div class="card-header d-flex justify-content-between">
+    <span><i class="bi bi-calendar-check me-2 text-primary"></i>Attendance for {{ date_filter }}</span>
+    <a href="{% url 'mark_attendance' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus me-1"></i>Mark Single</a>
+  </div>
+  <div class="card-body p-0">
+    {% if attendances %}
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr><th>Student</th><th>Class</th><th>Subject</th><th>Status</th><th>Remarks</th></tr>
+        </thead>
+        <tbody>
+          {% for a in attendances %}
+          <tr>
+            <td>
+              <a href="{% url 'student_detail' a.student.pk %}" style="font-weight:600;text-decoration:none;color:inherit;">
+                {{ a.student.full_name }}
+              </a>
+              <div style="font-size:11px;color:#64748b;">{{ a.student.student_id }}</div>
+            </td>
+            <td>{{ a.student.class_name }} {{ a.student.section }}</td>
+            <td>{{ a.subject|default:"—" }}</td>
+            <td><span class="badge badge-{{ a.status }}">{{ a.get_status_display }}</span></td>
+            <td style="font-size:12px;color:#64748b;">{{ a.remarks|default:"—" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-calendar-x fs-1 d-block mb-2"></i>No attendance records for this date.
+      <br><a href="{% url 'bulk_attendance' %}" class="btn btn-primary btn-sm mt-2">Mark Attendance</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

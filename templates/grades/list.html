@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block title %}Grades – EduManage{% endblock %}
+{% block page_title %}Grades{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+  <div class="card-body">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label">Subject</label>
+        <input type="text" name="subject" class="form-control" placeholder="Filter by subject" value="{{ subject }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Exam Type</label>
+        <select name="exam_type" class="form-select">
+          <option value="">All Types</option>
+          <option value="midterm" {% if exam_type == 'midterm' %}selected{% endif %}>Midterm</option>
+          <option value="final" {% if exam_type == 'final' %}selected{% endif %}>Final</option>
+          <option value="quiz" {% if exam_type == 'quiz' %}selected{% endif %}>Quiz</option>
+          <option value="assignment" {% if exam_type == 'assignment' %}selected{% endif %}>Assignment</option>
+          <option value="practical" {% if exam_type == 'practical' %}selected{% endif %}>Practical</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Class</label>
+        <select name="class_name" class="form-select">
+          <option value="">All Classes</option>
+          {% for c in classes %}<option value="{{ c }}" {% if class_filter == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary flex-fill">Filter</button>
+        <a href="{% url 'grade_list' %}" class="btn btn-outline-secondary">Reset</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% if stats.avg %}
+<div class="row g-3 mb-4">
+  <div class="col-4">
+    <div class="stat-card stat-violet" style="padding:18px;">
+      <div class="stat-value" style="font-size:26px;">{{ stats.avg|floatformat:1 }}%</div>
+      <div class="stat-label">Average Marks</div>
+    </div>
+  </div>
+  <div class="col-4">
+    <div class="stat-card stat-green" style="padding:18px;">
+      <div class="stat-value" style="font-size:26px;">{{ stats.mx }}</div>
+      <div class="stat-label">Highest</div>
+    </div>
+  </div>
+  <div class="col-4">
+    <div class="stat-card stat-rose" style="padding:18px;">
+      <div class="stat-value" style="font-size:26px;">{{ stats.mn }}</div>
+      <div class="stat-label">Lowest</div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="card">
+  <div class="card-header d-flex justify-content-between">
+    <span><i class="bi bi-bar-chart me-2 text-primary"></i>Grade Records</span>
+    <a href="{% url 'add_grade' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus me-1"></i>Add Grade</a>
+  </div>
+  <div class="card-body p-0">
+    {% if grades %}
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr><th>Student</th><th>Subject</th><th>Type</th><th>Marks</th><th>%</th><th>Grade</th><th>Date</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for g in grades %}
+          <tr>
+            <td>
+              <a href="{% url 'student_detail' g.student.pk %}" style="font-weight:600;text-decoration:none;color:inherit;">
+                {{ g.student.full_name }}
+              </a>
+              <div style="font-size:11px;color:#64748b;">{{ g.student.student_id }}</div>
+            </td>
+            <td>{{ g.subject }}</td>
+            <td>{{ g.get_exam_type_display }}</td>
+            <td>{{ g.marks_obtained }}/{{ g.total_marks }}</td>
+            <td>
+              <span style="font-weight:600;{% if g.percentage >= 80 %}color:#059669{% elif g.percentage >= 50 %}color:#d97706{% else %}color:#dc2626{% endif %}">
+                {{ g.percentage }}%
+              </span>
+            </td>
+            <td><span class="badge grade-{{ g.grade }}">{{ g.grade }}</span></td>
+            <td style="font-size:12px;">{{ g.exam_date }}</td>
+            <td>
+              <div class="d-flex gap-1">
+                <a href="{% url 'edit_grade' g.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+                <a href="{% url 'delete_grade' g.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-bar-chart fs-1 d-block mb-2"></i>No grade records found.
+      <br><a href="{% url 'add_grade' %}" class="btn btn-primary btn-sm mt-2">Add Grade</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
